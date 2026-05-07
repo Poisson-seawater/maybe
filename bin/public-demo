@@ -24,6 +24,8 @@ SLUG="${PUBLIC_DEMO_SLUG:-test-tahiti}"
 EMAIL="${PUBLIC_DEMO_EMAIL:-tahiti@gmail.com}"
 SECRET_KEY_BASE="${PUBLIC_DEMO_SECRET_KEY_BASE:-demo-public-check}"
 APP_DOMAIN="${PUBLIC_DEMO_APP_DOMAIN:-demo.localhost}"
+PROXY_NETWORK="${PUBLIC_DEMO_PROXY_NETWORK:-}"
+PROXY_ALIAS="${PUBLIC_DEMO_PROXY_ALIAS:-maybe-demo-web}"
 
 export PUBLIC_DEMO_COMPOSE_FILE="$COMPOSE_FILE"
 export PUBLIC_DEMO_PROJECT_NAME="$PROJECT_NAME"
@@ -33,6 +35,27 @@ export PUBLIC_DEMO_SLUG="$SLUG"
 export PUBLIC_DEMO_EMAIL="$EMAIL"
 export PUBLIC_DEMO_SECRET_KEY_BASE="$SECRET_KEY_BASE"
 export PUBLIC_DEMO_APP_DOMAIN="$APP_DOMAIN"
+
+connect_proxy_network() {
+  if [[ -z "$PROXY_NETWORK" ]]; then
+    return
+  fi
+
+  local container_name="${PROJECT_NAME}-web-1"
+
+  if ! run_cmd docker network inspect "$PROXY_NETWORK" >/dev/null 2>&1; then
+    echo "Proxy network not found: $PROXY_NETWORK" >&2
+    exit 1
+  fi
+
+  if run_cmd docker inspect --format '{{json .NetworkSettings.Networks}}' "$container_name" | grep -q "\"$PROXY_NETWORK\""; then
+    echo "Demo web container already connected to proxy network: $PROXY_NETWORK"
+    return
+  fi
+
+  echo "Connecting demo web container to proxy network: $PROXY_NETWORK (alias: $PROXY_ALIAS)"
+  run_cmd docker network connect --alias "$PROXY_ALIAS" "$PROXY_NETWORK" "$container_name"
+}
 
 docker_access_mode() {
   if docker info >/dev/null 2>&1; then
@@ -111,6 +134,7 @@ start_demo() {
 
   echo "Starting isolated public demo stack..."
   compose_cmd up -d --build
+  connect_proxy_network
 
   wait_for_url "http://127.0.0.1:${PORT}/up" "Waiting for the demo stack to boot..."
   seed_demo

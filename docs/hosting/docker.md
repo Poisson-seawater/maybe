@@ -197,7 +197,15 @@ PUBLIC_DEMO_APP_DOMAIN="demo.example.com"
 PUBLIC_DEMO_SECRET_KEY_BASE="replace-with-a-generated-secret"
 PUBLIC_DEMO_POSTGRES_PASSWORD="replace-with-a-demo-db-password"
 PUBLIC_DEMO_PORT=3002
+PUBLIC_DEMO_RAILS_FORCE_SSL=true
+PUBLIC_DEMO_RAILS_ASSUME_SSL=true
+# Optional: join an existing Docker network used by your reverse proxy
+PUBLIC_DEMO_PROXY_NETWORK="reverse-proxy-network"
+# Optional: network alias exposed on that proxy network
+PUBLIC_DEMO_PROXY_ALIAS="maybe-demo-web"
 ```
+
+Set `PUBLIC_DEMO_RAILS_FORCE_SSL=true` and `PUBLIC_DEMO_RAILS_ASSUME_SSL=true` when your reverse proxy terminates HTTPS in front of the demo app.
 
 You can then start the isolated demo stack with the helper script:
 
@@ -221,6 +229,8 @@ http://localhost:3002/demo/test-tahiti
 ### Reverse proxy
 
 Point your reverse proxy to `127.0.0.1:3002`. The demo stack binds to loopback only by default, so the port is not directly exposed on the public network interface.
+
+If your reverse proxy runs in Docker and cannot reach the host loopback binding directly, set `PUBLIC_DEMO_PROXY_NETWORK` before starting the demo stack. The helper script will connect the demo web container to that existing Docker network with the alias from `PUBLIC_DEMO_PROXY_ALIAS`, so your proxy can target `maybe-demo-web:3000` instead.
 
 The public-demo-only app mode does the following:
 
