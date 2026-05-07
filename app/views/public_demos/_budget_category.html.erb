@@ -1,0 +1,51 @@
+<div class="w-full bg-container p-4">
+  <div class="flex items-center gap-3">
+    <% if budget_category.initialized? %>
+      <div class="h-10 w-10">
+        <%= render "budget_categories/budget_category_donut", budget_category: budget_category %>
+      </div>
+    <% else %>
+      <div class="flex h-8 w-8 items-center justify-center rounded-full" style="color: <%= budget_category.category.color %>">
+        <% if budget_category.category.lucide_icon %>
+          <%= icon(budget_category.category.lucide_icon, color: "current") %>
+        <% else %>
+          <%= render DS::FilledIcon.new(
+            variant: :text,
+            hex_color: budget_category.category.color,
+            text: budget_category.category.name,
+            size: "sm",
+            rounded: true
+          ) %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div>
+      <p class="text-sm font-medium text-primary"><%= budget_category.category.name %></p>
+
+      <% if budget_category.initialized? %>
+        <% if budget_category.available_to_spend.negative? %>
+          <p class="text-sm font-medium text-red-500"><%= t("public_demos.budget.summary.over", amount: format_money(budget_category.available_to_spend_money.abs)) %></p>
+        <% elsif budget_category.available_to_spend.zero? %>
+          <p class="text-sm font-medium <%= budget_category.budgeted_spending.positive? ? "text-orange-500" : "text-secondary" %>">
+            <%= t("public_demos.budget.summary.left", amount: format_money(budget_category.available_to_spend_money)) %>
+          </p>
+        <% else %>
+          <p class="text-sm font-medium text-secondary"><%= t("public_demos.budget.summary.left", amount: format_money(budget_category.available_to_spend_money)) %></p>
+        <% end %>
+      <% else %>
+        <p class="text-sm font-medium text-secondary">
+          <%= t("public_demos.budget.categories.average", amount: budget_category.median_monthly_expense_money.format) %>
+        </p>
+      <% end %>
+    </div>
+
+    <div class="ml-auto text-right">
+      <p class="text-sm font-medium text-primary"><%= format_money(budget_category.actual_spending_money) %></p>
+
+      <% if budget_category.initialized? %>
+        <p class="text-sm text-secondary"><%= t("public_demos.budget.categories.from_budget", amount: format_money(budget_category.budgeted_spending_money)) %></p>
+      <% end %>
+    </div>
+  </div>
+</div>

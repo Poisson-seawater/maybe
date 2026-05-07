@@ -4,7 +4,8 @@
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
 
-  <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+  <% tailwind_asset_present = Rails.application.assets.resolver.resolve("tailwind.css").present? %>
+  <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" if tailwind_asset_present || !Rails.env.test? %>
 
   <%= javascript_include_tag "https://cdn.plaid.com/link/v2/stable/link-initialize.js" %>
   <%= combobox_style_tag %>

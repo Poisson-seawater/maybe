@@ -42,6 +42,8 @@
 
     <% menu.with_item(variant: "divider") %>
 
-    <% menu.with_item(variant: "button", text: "Log out", icon: "log-out", href: session_path(Current.session), method: :delete) %>
+    <% unless public_demo_mode? %>
+      <% menu.with_item(variant: "button", text: "Log out", icon: "log-out", href: session_path(Current.session), method: :delete) %>
+    <% end %>
   <% end %>
 </div>

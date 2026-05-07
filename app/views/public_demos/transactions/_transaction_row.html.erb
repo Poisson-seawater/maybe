@@ -1,0 +1,70 @@
+<%# locals: (transaction:) %>
+<% entry = transaction.entry %>
+<% type_label = if transaction.transfer?
+                  t(".transfer")
+                elsif entry.amount.negative?
+                  t(".income")
+                else
+                  t(".expense")
+                end %>
+<% type_classes = if transaction.transfer?
+                    "bg-blue-500/10 text-blue-700"
+                  elsif entry.amount.negative?
+                    "bg-green-500/10 text-green-700"
+                  else
+                    "bg-red-500/10 text-red-700"
+                  end %>
+<% amount_text = transaction.transfer? ? "+/- #{format_money(entry.amount_money.abs)}" : format_money(-entry.amount_money) %>
+<% amount_classes = if transaction.transfer?
+                      "text-blue-700"
+                    elsif entry.amount.negative?
+                      "text-green-600"
+                    else
+                      "text-primary"
+                    end %>
+
+<tr class="align-top text-sm">
+  <td class="whitespace-nowrap px-5 py-4 text-secondary"><%= l(entry.date, format: :long) %></td>
+
+  <td class="px-5 py-4">
+    <div class="flex min-w-[18rem] items-start gap-3">
+      <% if transaction.merchant&.logo_url.present? %>
+        <%= image_tag transaction.merchant.logo_url, class: "mt-0.5 h-8 w-8 rounded-full", loading: "lazy" %>
+      <% else %>
+        <%= render DS::FilledIcon.new(variant: :text, text: entry.name, size: "sm", rounded: true) %>
+      <% end %>
+
+      <div class="min-w-0 space-y-1">
+        <p class="truncate font-medium text-primary"><%= entry.name %></p>
+
+        <div class="flex flex-wrap items-center gap-2 text-xs text-secondary">
+          <% if transaction.merchant.present? %>
+            <span><%= transaction.merchant.name %></span>
+          <% end %>
+
+          <% transaction.tags.each do |tag| %>
+            <span class="rounded-full border border-secondary px-2 py-0.5"><%= tag.name %></span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </td>
+
+  <td class="px-5 py-4 text-secondary"><%= entry.account.name %></td>
+
+  <td class="px-5 py-4">
+    <% if transaction.transfer? %>
+      <span class="inline-flex items-center rounded-full bg-blue-500/10 px-3 py-1 text-sm font-medium text-blue-700"><%= transaction.loan_payment? ? t(".loan_payment") : t(".transfer") %></span>
+    <% elsif transaction.category.present? %>
+      <%= render partial: "categories/badge", locals: { category: transaction.category } %>
+    <% else %>
+      <span class="inline-flex items-center rounded-full bg-container-inset px-3 py-1 text-sm font-medium text-secondary"><%= t(".uncategorized") %></span>
+    <% end %>
+  </td>
+
+  <td class="px-5 py-4">
+    <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium <%= type_classes %>"><%= type_label %></span>
+  </td>
+
+  <td class="px-5 py-4 text-right font-medium <%= amount_classes %>"><%= amount_text %></td>
+</tr>

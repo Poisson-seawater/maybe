@@ -92,6 +92,7 @@ Fill in this file with the following variables:
 ```txt
 SECRET_KEY_BASE="replacemewiththegeneratedstringfromthepriorstep"
 POSTGRES_PASSWORD="replacemewithyourdesireddatabasepassword"
+APP_PORT=3001
 ```
 
 ### Step 4: Run the app
@@ -104,7 +105,7 @@ docker compose up
 
 This will pull our official Docker image and start the app. You will see logs in your terminal.
 
-Open your browser, and navigate to `http://localhost:3000`.
+Open your browser, and navigate to `http://localhost:3001`.
 
 If everything is working, you will see the Maybe login screen.
 
@@ -131,7 +132,7 @@ docker compose ls
 
 ### Step 7: Enjoy!
 
-Your app is now set up. You can visit it at `http://localhost:3000` in your browser.
+Your app is now set up. You can visit it at `http://localhost:3001` in your browser.
 
 If you find bugs or have a feature request, be sure to read through our [contributing guide here](https://github.com/maybe-finance/maybe/wiki/How-to-Contribute-Effectively-to-this-Project).
 
@@ -174,7 +175,96 @@ docker compose build # This rebuilds the app with updates
 docker compose up --no-deps -d app # This restarts the app using the newest version
 ```
 
+## Running an isolated public demo on the same VPS
+
+If you want to publish a read-only demo without sharing the main Maybe database, use the dedicated `compose.demo.yml` stack. This starts a separate web app, Postgres database, and Redis instance for the public demo only.
+
+### Recommended topology
+
+- Keep your main Maybe stack unchanged for normal logins and private data
+- Run the demo as a second Docker Compose project, for example `maybe-demo`
+- Publish the demo through a reverse proxy that points to `127.0.0.1:3002`
+
+### Demo-specific environment
+
+At minimum, configure the following variables before you start the demo stack:
+
+```txt
+PUBLIC_DEMO_ONLY=true
+PUBLIC_DEMO_SLUG="test-tahiti"
+PUBLIC_DEMO_EMAIL="tahiti@gmail.com"
+PUBLIC_DEMO_APP_DOMAIN="demo.example.com"
+PUBLIC_DEMO_SECRET_KEY_BASE="replace-with-a-generated-secret"
+PUBLIC_DEMO_POSTGRES_PASSWORD="replace-with-a-demo-db-password"
+PUBLIC_DEMO_PORT=3002
+PUBLIC_DEMO_RAILS_FORCE_SSL=true
+PUBLIC_DEMO_RAILS_ASSUME_SSL=true
+# Optional: join an existing Docker network used by your reverse proxy
+PUBLIC_DEMO_PROXY_NETWORK="reverse-proxy-network"
+# Optional: network alias exposed on that proxy network
+PUBLIC_DEMO_PROXY_ALIAS="maybe-demo-web"
+```
+
+Set `PUBLIC_DEMO_RAILS_FORCE_SSL=true` and `PUBLIC_DEMO_RAILS_ASSUME_SSL=true` when your reverse proxy terminates HTTPS in front of the demo app.
+
+You can then start the isolated demo stack with the helper script:
+
+```bash
+cd /path/to/maybe
+./bin/public-demo start
+```
+
+The script will:
+
+1. Build and boot the isolated demo stack from `compose.demo.yml`
+2. Wait for the app to boot
+3. Load synthetic demo data into the demo database only
+4. Expose the read-only demo at:
+
+```txt
+http://localhost:3002/
+http://localhost:3002/demo/test-tahiti
+```
+
+### Reverse proxy
+
+Point your reverse proxy to `127.0.0.1:3002`. The demo stack binds to loopback only by default, so the port is not directly exposed on the public network interface.
+
+If your reverse proxy runs in Docker and cannot reach the host loopback binding directly, set `PUBLIC_DEMO_PROXY_NETWORK` before starting the demo stack. The helper script will connect the demo web container to that existing Docker network with the alias from `PUBLIC_DEMO_PROXY_ALIAS`, so your proxy can target `maybe-demo-web:3000` instead.
+
+The public-demo-only app mode does the following:
+
+- Opens the full Maybe application at `/` using the configured demo account automatically
+- Keeps `/demo/:slug` and `/demo/:slug/transactions` as convenience entry points that redirect into the full app
+- Leaves `/up`, `service-worker`, and `manifest` available
+- Blocks non-`GET` and non-`HEAD` requests so the public demo stays read-only even though the full UI is visible
+
+### Notes
+
+- The demo stack does **not** include a Sidekiq worker by default
+- The demo dataset is isolated from the main Maybe instance because it uses a separate Docker Compose project, database, Redis, volumes, and credentials
+- The demo accepts `?locale=en` and `?locale=fr` on the `/demo/:slug` entry URLs before redirecting into the app
+- The UI will remain partly in English in French mode until Maybe's broader French translations are implemented more fully
+
 ## Troubleshooting
+
+### Reset a user's password
+
+If you can reach the app but a user's password no longer works, you can reset it directly from the running Rails container.
+
+For the normal Maybe stack, run this from the directory that contains your main `compose.yml`:
+
+```bash
+docker compose exec web bundle exec rails runner 'user = User.find_by!(email: "you@example.com"); user.update!(password: "new-password", password_confirmation: "new-password"); puts "Password updated for #{user.email}"'
+```
+
+For the isolated public demo stack, run:
+
+```bash
+docker compose -f compose.demo.yml -p maybe-demo exec web bundle exec rails runner 'user = User.find_by!(email: "tahiti@gmail.com"); user.update!(password: "new-password", password_confirmation: "new-password"); puts "Password updated for #{user.email}"'
+```
+
+If you changed the demo compose project name, replace `maybe-demo` with your own `PUBLIC_DEMO_PROJECT_NAME` value.
 
 ### ActiveRecord::DatabaseConnectionError
 

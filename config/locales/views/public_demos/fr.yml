@@ -1,0 +1,115 @@
+---
+fr:
+  public_demos:
+    budget:
+      page_title: "Budget de la démo %{demo_name}"
+      heading: Budget
+      description: Consultez le budget mensuel de cette famille de démonstration en lecture seule.
+      today: Aujourd'hui
+      summary:
+        spent: Dépensé
+        of_budget: "sur %{amount}"
+        not_configured: Aucun budget configuré
+        unused: Non utilisé
+        left: "%{amount} restant"
+        over: "%{amount} au-dessus"
+      budgeted:
+        expected_income: Revenu attendu
+        budgeted: Budgété
+        earned: "%{amount} gagnés"
+        spent: "%{amount} dépensés"
+      actuals:
+        income: Revenus
+        expenses: Dépenses
+      categories:
+        heading: Catégories
+        amount: Montant
+        average: "%{amount} de moyenne"
+        from_budget: "sur %{amount}"
+        empty: Aucune catégorie de dépense disponible pour ce budget de démo.
+        read_only: Lecture seule
+    show:
+      cash_flow: Flux de trésorerie
+      page_title: "Démo %{demo_name}"
+      surplus: Excédent
+    transactions:
+      page_title: "Transactions de la démo %{demo_name}"
+      heading: Transactions
+      description: Parcourez un grand registre de transactions en lecture seule pour cette famille de démo. Vous pouvez rechercher, filtrer et paginer les données sans vous connecter.
+      results_label: entrées visibles
+      filter: Filtrer
+      clear_filters: Réinitialiser
+      search_placeholder: Rechercher des transactions, marchands, notes ou comptes
+      equal_to: égal à
+      greater_than: supérieur à
+      less_than: inférieur à
+      summary:
+        total_transactions: Transactions totales
+        income: Revenus
+        expenses: Dépenses
+      empty:
+        title: Aucune transaction ne correspond à ces filtres
+        body: Essayez d'ajuster les filtres ou réinitialisez-les pour revoir tout l'historique des transactions.
+        clear_filters: Réinitialiser les filtres
+      table:
+        showing_page: "Page %{page} sur %{pages}"
+        headers:
+          date: Date
+          transaction: Transaction
+          account: Compte
+          category: Catégorie
+          type: Type
+          amount: Montant
+      transaction_row:
+        expense: Dépense
+        income: Revenu
+        loan_payment: Paiement de prêt
+        transfer: Transfert
+        uncategorized: Non catégorisé
+      menu:
+        account_filter: Compte
+        amount_filter: Montant
+        apply: Appliquer
+        cancel: Annuler
+        category_filter: Catégorie
+        clear_filters: Réinitialiser
+        date_filter: Date
+        merchant_filter: Marchand
+        tag_filter: Étiquette
+        type_filter: Type
+      filter_badge:
+        expense: Dépense
+        income: Revenu
+        on_or_after: le ou après le %{date}
+        on_or_before: le ou avant le %{date}
+        transfer: Transfert
+      filters:
+        account_filter:
+          placeholder: Filtrer les comptes
+        amount_filter:
+          equal_to: Égal à
+          greater_than: Supérieur à
+          less_than: Inférieur à
+          placeholder: "0"
+        category_filter:
+          placeholder: Filtrer les catégories
+        date_filter:
+          start_date: Date de début
+          end_date: Date de fin
+        merchant_filter:
+          placeholder: Filtrer les marchands
+        tag_filter:
+          placeholder: Filtrer les étiquettes
+        type_filter:
+          expense: Dépense
+          income: Revenu
+          transfer: Transfert
+  layouts:
+    public_demo:
+      description_html: "Ceci est une démo financière en lecture seule pour %{family_name}. Aucune connexion n'est requise et aucun visiteur ne peut modifier les données."
+      eyebrow: Démo publique
+      language: Langue
+      tabs:
+        overview: Aperçu
+        budget: Budget
+        transactions: Transactions

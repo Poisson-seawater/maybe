@@ -1,0 +1,40 @@
+<% title t(".page_title", demo_name: @demo_title) %>
+
+<div class="w-full space-y-6 pb-12">
+  <% if @accounts.any? %>
+    <section class="bg-container py-4 rounded-xl shadow-border-xs">
+      <%= render partial: "pages/dashboard/net_worth_chart", locals: {
+        balance_sheet: @balance_sheet,
+        period: @period,
+        form_path: public_demo_path(@demo_slug),
+        form_params: {
+          locale: @demo_locale,
+          cashflow_period: @cashflow_period.key
+        }
+      } %>
+    </section>
+
+    <section>
+      <%= render "pages/dashboard/balance_sheet", balance_sheet: @balance_sheet, read_only: true %>
+    </section>
+
+    <%= turbo_frame_tag "cashflow_sankey_section" do %>
+      <section class="bg-container py-4 rounded-xl shadow-border-xs">
+        <%= render partial: "pages/dashboard/cashflow_sankey", locals: {
+          sankey_data: @cashflow_sankey_data,
+          period: @cashflow_period,
+          form_path: public_demo_path(@demo_slug),
+          form_params: {
+            locale: @demo_locale,
+            period: @period.key
+          },
+          read_only: true
+        } %>
+      </section>
+    <% end %>
+  <% else %>
+    <section>
+      <%= render "pages/dashboard/no_accounts_graph_placeholder", read_only: true %>
+    </section>
+  <% end %>
+</div>

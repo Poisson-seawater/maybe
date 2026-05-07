@@ -1,0 +1,12 @@
+---
+fr:
+  pages:
+    dashboard:
+      cashflow_sankey:
+        add_transaction: Ajouter une transaction
+        empty_subtitle: Ajoutez des transactions pour afficher les flux de trésorerie ou élargissez la période.
+        empty_title: Aucune donnée de flux de trésorerie pour cette période
+        title: Flux de trésorerie
+      net_worth_chart:
+        data_not_available: Données indisponibles pour la période sélectionnée
+        title: Valeur nette

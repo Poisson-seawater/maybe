@@ -1,0 +1,115 @@
+---
+en:
+  public_demos:
+    budget:
+      page_title: "%{demo_name} Demo Budget"
+      heading: Budget
+      description: Review this demo family's monthly budget in read-only mode.
+      today: Today
+      summary:
+        spent: Spent
+        of_budget: "of %{amount}"
+        not_configured: No budget configured
+        unused: Unused
+        left: "%{amount} left"
+        over: "%{amount} over"
+      budgeted:
+        expected_income: Expected income
+        budgeted: Budgeted
+        earned: "%{amount} earned"
+        spent: "%{amount} spent"
+      actuals:
+        income: Income
+        expenses: Expenses
+      categories:
+        heading: Categories
+        amount: Amount
+        average: "%{amount} avg"
+        from_budget: "from %{amount}"
+        empty: No expense categories available for this demo budget.
+        read_only: Read-only
+    show:
+      cash_flow: Cash Flow
+      page_title: "%{demo_name} Demo"
+      surplus: Surplus
+    transactions:
+      page_title: "%{demo_name} Demo Transactions"
+      heading: Transactions
+      description: Browse a read-only transaction ledger for this demo family. You can search, filter, and paginate the data without needing to sign in.
+      results_label: visible entries
+      filter: Filter
+      clear_filters: Clear filters
+      search_placeholder: Search transactions, merchants, notes, or accounts
+      equal_to: equal to
+      greater_than: greater than
+      less_than: less than
+      summary:
+        total_transactions: Total transactions
+        income: Income
+        expenses: Expenses
+      empty:
+        title: No transactions match these filters
+        body: Try adjusting the filters or clear them to see the full transaction history.
+        clear_filters: Clear filters
+      table:
+        showing_page: "Page %{page} of %{pages}"
+        headers:
+          date: Date
+          transaction: Transaction
+          account: Account
+          category: Category
+          type: Type
+          amount: Amount
+      transaction_row:
+        expense: Expense
+        income: Income
+        loan_payment: Loan Payment
+        transfer: Transfer
+        uncategorized: Uncategorized
+      menu:
+        account_filter: Account
+        amount_filter: Amount
+        apply: Apply
+        cancel: Cancel
+        category_filter: Category
+        clear_filters: Clear filters
+        date_filter: Date
+        merchant_filter: Merchant
+        tag_filter: Tag
+        type_filter: Type
+      filter_badge:
+        expense: Expense
+        income: Income
+        on_or_after: on or after %{date}
+        on_or_before: on or before %{date}
+        transfer: Transfer
+      filters:
+        account_filter:
+          placeholder: Filter accounts
+        amount_filter:
+          equal_to: Equal to
+          greater_than: Greater than
+          less_than: Less than
+          placeholder: "0"
+        category_filter:
+          placeholder: Filter categories
+        date_filter:
+          start_date: Start date
+          end_date: End date
+        merchant_filter:
+          placeholder: Filter merchants
+        tag_filter:
+          placeholder: Filter tags
+        type_filter:
+          expense: Expense
+          income: Income
+          transfer: Transfer
+  layouts:
+    public_demo:
+      description_html: This is a read-only finance demo for %{family_name}. No login is required and no visitor can edit the data.
+      eyebrow: Public Demo
+      language: Language
+      tabs:
+        overview: Overview
+        budget: Budget
+        transactions: Transactions

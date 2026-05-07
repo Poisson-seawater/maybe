@@ -1,11 +1,15 @@
-<%# locals: (sankey_data:, period:) %>
+<%# locals: (sankey_data:, period:, form_path: root_path, form_params: {}, read_only: false) %>
 <div id="cashflow-sankey-chart">
   <div class="flex justify-between items-center gap-4 px-4 mb-4">
     <h2 class="text-lg font-medium inline-flex items-center gap-1.5">
-      Cashflow
+      <%= t("pages.dashboard.cashflow_sankey.title") %>
     </h2>
 
-    <%= form_with url: root_path, method: :get, data: { controller: "auto-submit-form", turbo_frame: "cashflow_sankey_section" } do |form| %>
+    <%= form_with url: form_path, method: :get, data: { controller: "auto-submit-form", turbo_frame: "cashflow_sankey_section" } do |form| %>
+      <% form_params.each do |key, value| %>
+        <%= hidden_field_tag key, value %>
+      <% end %>
+
       <%= form.select :cashflow_period,
                 Period.as_options,
                 { selected: period.key },
@@ -30,14 +34,16 @@
           icon: "activity" # cashflow placeholder icon
         ) %>
 
-        <p class="text-sm font-medium text-primary">No cash flow data for this time period</p>
-        <p class="text-secondary text-sm">Add transactions to display cash flow data or expand the time period</p>
-        <%= render DS::Link.new(
-          text: "Add transaction",
-          icon: "plus",
-          href: new_transaction_path,
-          frame: :modal
-        ) %>
+        <p class="text-sm font-medium text-primary"><%= t("pages.dashboard.cashflow_sankey.empty_title") %></p>
+        <p class="text-secondary text-sm"><%= t("pages.dashboard.cashflow_sankey.empty_subtitle") %></p>
+        <% unless read_only %>
+          <%= render DS::Link.new(
+            text: t("pages.dashboard.cashflow_sankey.add_transaction"),
+            icon: "plus",
+            href: new_transaction_path,
+            frame: :modal
+          ) %>
+        <% end %>
       </div>
     </div>
   <% end %>
