@@ -4,6 +4,11 @@ en:
     changelog:
       title: What's new
     dashboard:
+      cashflow_sankey:
+        add_transaction: Add transaction
+        empty_subtitle: Add transactions to display cash flow data or expand the time period
+        empty_title: No cash flow data for this time period
+        title: Cashflow
       net_worth_chart:
         data_not_available: Data not available for the selected period
         title: Net Worth

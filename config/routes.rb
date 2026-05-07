@@ -2,6 +2,10 @@ require "sidekiq/web"
 require "sidekiq/cron/web"
 
 Rails.application.routes.draw do
+  get "demo/:slug/transactions", to: "public_demos#transactions", as: :public_demo_transactions
+  get "demo/:slug/budget", to: "public_demos#budget", as: :public_demo_budget
+  get "demo/:slug", to: "public_demos#show", as: :public_demo
+
   use_doorkeeper
   # MFA routes
   resource :mfa, controller: "mfa", only: [ :new, :create ] do
@@ -229,8 +233,6 @@ Rails.application.routes.draw do
       end
     end
   end
-
-
 
   resources :currencies, only: %i[show]
 

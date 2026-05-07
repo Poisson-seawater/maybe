@@ -1,0 +1,54 @@
+<%= tag.div data: { controller: "donut-chart", donut_chart_segments_value: budget.to_donut_segments_json }, class: "relative h-full" do %>
+  <div data-donut-chart-target="chartContainer" class="absolute inset-0 pointer-events-none"></div>
+
+  <div data-donut-chart-target="contentContainer" class="flex h-full items-center justify-center">
+    <div data-donut-chart-target="defaultContent" class="flex flex-col items-center">
+      <% if budget.initialized? %>
+        <div class="mb-2 text-sm text-gray-600">
+          <span><%= t("public_demos.budget.summary.spent") %></span>
+        </div>
+
+        <div class="mb-2 text-3xl font-medium <%= budget.available_to_spend.negative? ? "text-red-500" : "text-primary" %>">
+          <%= format_money(budget.actual_spending_money) %>
+        </div>
+
+        <p class="text-sm font-medium text-secondary">
+          <%= t("public_demos.budget.summary.of_budget", amount: budget.budgeted_spending_money.format) %>
+        </p>
+      <% else %>
+        <div class="mb-2 text-3xl text-subdued">
+          <span><%= format_money Money.new(0, budget.currency || budget.family.currency) %></span>
+        </div>
+
+        <p class="text-sm text-secondary"><%= t("public_demos.budget.summary.not_configured") %></p>
+      <% end %>
+    </div>
+
+    <% budget.budget_categories.each do |bc| %>
+      <div id="segment_<%= bc.id %>" class="hidden">
+        <div class="flex flex-col items-center gap-2">
+          <div class="flex items-center gap-3">
+            <div class="h-3 w-1 rounded-xl" style="background-color: <%= bc.category.color %>"></div>
+            <p class="text-sm text-secondary"><%= bc.category.name %></p>
+          </div>
+
+          <p class="text-3xl font-medium <%= bc.available_to_spend.negative? ? "text-red-500" : "text-primary" %>">
+            <%= format_money(bc.actual_spending_money) %>
+          </p>
+
+          <p class="text-sm font-medium text-secondary">
+            <%= t("public_demos.budget.summary.of_budget", amount: bc.budgeted_spending_money.format(precision: 0)) %>
+          </p>
+        </div>
+      </div>
+    <% end %>
+
+    <div id="segment_unused" class="hidden">
+      <p class="mb-2 text-center text-sm text-secondary"><%= t("public_demos.budget.summary.unused") %></p>
+
+      <p class="text-3xl font-medium text-primary">
+        <%= format_money(budget.available_to_spend_money) %>
+      </p>
+    </div>
+  </div>
+<% end %>

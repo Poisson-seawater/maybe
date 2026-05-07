@@ -1,4 +1,4 @@
-<%# locals: (balance_sheet:, period:, **args) %>
+<%# locals: (balance_sheet:, period:, form_path: root_path, form_params: {}, **args) %>
 
 <div id="net-worth-chart">
   <% series = balance_sheet.net_worth_series(period: period) %>
@@ -21,7 +21,11 @@
       </div>
     </div>
 
-    <%= form_with url: root_path, method: :get, data: { controller: "auto-submit-form" } do |form| %>
+    <%= form_with url: form_path, method: :get, data: { controller: "auto-submit-form" } do |form| %>
+      <% form_params.each do |key, value| %>
+        <%= hidden_field_tag key, value %>
+      <% end %>
+
       <%= form.select :period,
                     Period.as_options,
                     { selected: period.key },

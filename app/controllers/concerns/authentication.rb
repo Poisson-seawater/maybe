@@ -18,6 +18,8 @@ module Authentication
     def authenticate_user!
       if session_record = find_session_by_cookie
         Current.session = session_record
+      elsif PublicDemoConfig.enabled?
+        Current.session = create_session_for(public_demo_user)
       else
         if self_hosted_first_login?
           redirect_to new_registration_url
@@ -41,6 +43,10 @@ module Authentication
       session = user.sessions.create!
       cookies.signed.permanent[:session_token] = { value: session.id, httponly: true }
       session
+    end
+
+    def public_demo_user
+      User.find_by!(email: PublicDemoConfig.email)
     end
 
     def self_hosted_first_login?

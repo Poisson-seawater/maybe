@@ -1,0 +1,55 @@
+<%# locals: (form:) %>
+<% filters = [
+  { key: "account_filter", label: t(".account_filter"), icon: "layers" },
+  { key: "date_filter", label: t(".date_filter"), icon: "calendar" },
+  { key: "type_filter", label: t(".type_filter"), icon: "tag" },
+  { key: "amount_filter", label: t(".amount_filter"), icon: "hash" },
+  { key: "category_filter", label: t(".category_filter"), icon: "shapes" },
+  { key: "tag_filter", label: t(".tag_filter"), icon: "tags" },
+  { key: "merchant_filter", label: t(".merchant_filter"), icon: "store" }
+] %>
+
+<%= render DS::Tabs.new(
+  variant: :unstyled,
+  active_tab: filters.first[:key],
+  active_btn_classes: "bg-surface text-primary",
+  inactive_btn_classes: "text-secondary hover:bg-container-inset"
+) do |tabs| %>
+  <div class="flex h-[50vh] w-full flex-col overflow-hidden md:h-80 md:w-[560px] md:flex-row">
+    <%= tabs.with_nav(classes: "shrink-0 flex w-full md:w-44 flex-row md:flex-col items-start overflow-x-auto md:overflow-x-visible border-b md:border-b-0 md:border-r border-secondary p-3 text-sm font-medium text-secondary") do |nav| %>
+      <% filters.each do |filter| %>
+        <%= nav.with_btn(id: filter[:key], label: filter[:label], classes: "w-full rounded-md px-3 py-2 flex items-center gap-2") do %>
+          <%= icon(filter[:icon]) %>
+          <%= tag.span(filter[:label], class: "text-sm font-medium") %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <div class="flex grow flex-col overflow-y-auto">
+      <div class="grow overflow-y-auto border-b border-secondary p-3">
+        <% filters.each do |filter| %>
+          <%= tabs.with_panel(tab_id: filter[:key]) do %>
+            <%= render "public_demos/transactions/filters/#{filter[:key]}", form: form %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="flex shrink-0 items-center justify-between gap-2 bg-container p-3">
+        <div>
+          <% if @q.present? %>
+            <%= render DS::Link.new(
+              text: t(".clear_filters"),
+              variant: "ghost",
+              href: public_demo_transactions_path(@demo_slug, locale: @demo_locale)
+            ) %>
+          <% end %>
+        </div>
+
+        <div>
+          <%= render DS::Button.new(text: t(".cancel"), type: "button", variant: "ghost", data: { action: "DS--menu#close" }) %>
+          <%= render DS::Button.new(text: t(".apply")) %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

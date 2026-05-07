@@ -1,6 +1,6 @@
 # SAFETY: Only operates in development/test environments to prevent data loss
 class Demo::DataCleaner
-  SAFE_ENVIRONMENTS = %w[development test]
+  SAFE_ENVIRONMENTS = %w[development test].freeze
 
   def initialize
     ensure_safe_environment!
@@ -21,8 +21,13 @@ class Demo::DataCleaner
   private
 
     def ensure_safe_environment!
-      unless SAFE_ENVIRONMENTS.include?(Rails.env)
-        raise SecurityError, "Demo::DataCleaner can only be used in #{SAFE_ENVIRONMENTS.join(', ')} environments. Current: #{Rails.env}"
-      end
+      return if SAFE_ENVIRONMENTS.include?(Rails.env)
+      return if public_demo_production?
+
+      raise SecurityError, "Demo::DataCleaner can only be used in #{SAFE_ENVIRONMENTS.join(', ')} environments. Current: #{Rails.env}"
+    end
+
+    def public_demo_production?
+      Rails.env.production? && PublicDemoConfig.enabled?
     end
 end

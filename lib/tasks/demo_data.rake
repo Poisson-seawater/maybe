@@ -23,10 +23,11 @@ namespace :demo_data do
   task default: :environment do
     start    = Time.now
     seed     = ENV.fetch("SEED", Random.new_seed)
+    email    = ENV.fetch("DEMO_DATA_EMAIL", PublicDemoConfig.email)
     puts "🚀 Loading FULL demo data (seed=#{seed})…"
 
     generator = Demo::Generator.new(seed: seed)
-    generator.generate_default_data!
+    generator.generate_default_data!(email: email)
 
     validate_demo_data
 

@@ -1,0 +1,60 @@
+<%= render "layouts/shared/htmldoc" do %>
+  <main class="min-h-full bg-surface">
+    <div class="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-10">
+      <header class="mb-8 rounded-2xl bg-container px-5 py-5 shadow-border-xs lg:px-8 lg:py-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div class="space-y-2">
+            <p class="text-xs font-medium uppercase tracking-[0.18em] text-secondary"><%= t("layouts.public_demo.eyebrow") %></p>
+            <h1 class="text-2xl font-medium text-primary lg:text-4xl"><%= @demo_title %></h1>
+            <p class="max-w-2xl text-sm text-secondary lg:text-base"><%= t("layouts.public_demo.description_html", family_name: tag.span(@demo_family.name, class: "font-medium text-primary")) %></p>
+          </div>
+
+          <div class="flex flex-col gap-3 lg:items-end">
+            <div class="rounded-xl border border-secondary px-4 py-3 text-sm text-secondary">
+              <p class="font-medium text-primary"><%= @demo_user.display_name %></p>
+              <p><%= @demo_user.email %></p>
+            </div>
+
+            <div class="inline-flex items-center gap-2 rounded-xl border border-secondary px-2 py-2 text-sm">
+              <span class="px-2 text-secondary"><%= t("layouts.public_demo.language") %></span>
+
+              <% [["EN", "en"], ["FR", "fr"]].each do |label, locale| %>
+                <%= link_to label,
+                    demo_path_for(@demo_tab, @demo_page_params.merge("locale" => locale)),
+                    class: class_names(
+                      "rounded-lg px-3 py-1.5 font-medium transition-colors",
+                      locale == @demo_locale ? "bg-primary text-white" : "text-secondary hover:bg-surface-hover hover:text-primary"
+                    ) %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <nav class="mt-5 flex flex-wrap gap-2 border-t border-secondary pt-5">
+          <%= link_to t("layouts.public_demo.tabs.overview"),
+              demo_path_for(:overview, locale: @demo_locale),
+              class: class_names(
+                "rounded-xl px-4 py-2 text-sm font-medium transition-colors",
+                @demo_tab == :overview ? "bg-primary text-white" : "bg-container-inset text-secondary hover:text-primary"
+              ) %>
+
+          <%= link_to t("layouts.public_demo.tabs.budget"),
+              demo_path_for(:budget, @demo_page_params.slice("month_year").merge("locale" => @demo_locale)),
+              class: class_names(
+                "rounded-xl px-4 py-2 text-sm font-medium transition-colors",
+                @demo_tab == :budget ? "bg-primary text-white" : "bg-container-inset text-secondary hover:text-primary"
+              ) %>
+
+          <%= link_to t("layouts.public_demo.tabs.transactions"),
+              demo_path_for(:transactions, locale: @demo_locale),
+              class: class_names(
+                "rounded-xl px-4 py-2 text-sm font-medium transition-colors",
+                @demo_tab == :transactions ? "bg-primary text-white" : "bg-container-inset text-secondary hover:text-primary"
+              ) %>
+        </nav>
+      </header>
+
+      <%= yield %>
+    </div>
+  </main>
+<% end %>

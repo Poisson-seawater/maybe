@@ -1,0 +1,23 @@
+<%# locals: (form:) %>
+<div data-controller="list-filter">
+  <div class="relative">
+    <input type="search" autocomplete="off" placeholder="<%= t('.placeholder') %>" data-list-filter-target="input" data-action="input->list-filter#filter" class="block w-full rounded-md border border-secondary bg-container py-2 pl-10 pr-3 focus:ring-gray-500 sm:text-sm">
+    <%= icon("search", class: "absolute inset-y-0 left-2 top-1/2 -translate-y-1/2 transform") %>
+  </div>
+
+  <div class="my-2" data-list-filter-target="list">
+    <% @demo_accounts.each do |account| %>
+      <div class="filterable-item flex items-center gap-2 p-2" data-filter-name="<%= account.name %>">
+        <%= form.check_box :accounts,
+                           {
+                             multiple: true,
+                             checked: @q[:accounts]&.include?(account.name),
+                             class: "checkbox checkbox--light"
+                           },
+                           account.name,
+                           nil %>
+        <%= form.label :accounts, account.name, value: account.name, class: "cursor-pointer text-sm text-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

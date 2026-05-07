@@ -1,0 +1,55 @@
+<div>
+  <div class="border-b border-secondary p-4">
+    <h3 class="mb-2 text-sm text-secondary"><%= t("public_demos.budget.actuals.income") %></h3>
+
+    <span class="mb-2 inline-block text-xl font-medium text-primary">
+      <%= budget.actual_income_money.format %>
+    </span>
+
+    <% if budget.income_category_totals.any? %>
+      <div>
+        <div class="mb-3 flex h-1.5 gap-1">
+          <% budget.income_category_totals.each do |category_total| %>
+            <div class="h-full rounded-full" style="background-color: <%= category_total.category.color %>; width: <%= category_total.weight %>%"></div>
+          <% end %>
+        </div>
+
+        <div class="flex flex-wrap gap-x-2.5 gap-y-1 text-xs">
+          <% budget.income_category_totals.each do |category_total| %>
+            <div class="flex items-center gap-1.5">
+              <div class="h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: <%= category_total.category.color %>"></div>
+              <span class="text-secondary"><%= category_total.category.name %></span>
+              <span class="text-primary"><%= number_to_percentage(category_total.weight, precision: 0) %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="p-4">
+    <h3 class="mb-2 text-sm text-secondary"><%= t("public_demos.budget.actuals.expenses") %></h3>
+
+    <span class="mb-2 inline-block text-xl font-medium text-primary"><%= budget.actual_spending_money.format %></span>
+
+    <% if budget.expense_category_totals.any? %>
+      <div>
+        <div class="mb-3 flex h-1.5 gap-1">
+          <% budget.expense_category_totals.each do |category_total| %>
+            <div class="h-full rounded-full" style="background-color: <%= category_total.category.color %>; width: <%= category_total.weight %>%"></div>
+          <% end %>
+        </div>
+
+        <div class="flex flex-wrap gap-x-2.5 gap-y-1 text-xs">
+          <% budget.expense_category_totals.each do |category_total| %>
+            <div class="flex items-center gap-1.5">
+              <div class="h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: <%= category_total.category.color %>"></div>
+              <span class="text-secondary"><%= category_total.category.name %></span>
+              <span class="text-primary"><%= number_to_percentage(category_total.weight, precision: 0) %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

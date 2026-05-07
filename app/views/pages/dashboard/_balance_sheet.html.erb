@@ -1,4 +1,4 @@
-<%# locals: (balance_sheet:, **args) %>
+<%# locals: (balance_sheet:, read_only: false, **args) %>
 
 <div class="space-y-4" id="balance-sheet">
   <% balance_sheet.classification_groups.each do |classification_group| %>
@@ -78,7 +78,11 @@
                       <div class="flex items-center gap-3">
                         <%= render "accounts/logo", account: account, size: "sm", color: account_group.color %>
 
-                        <%= link_to account.name, account_path(account) %>
+                        <% if read_only %>
+                          <span><%= account.name %></span>
+                        <% else %>
+                          <%= link_to account.name, account_path(account) %>
+                        <% end %>
                       </div>
 
                       <div class="ml-auto flex items-center text-right gap-6">

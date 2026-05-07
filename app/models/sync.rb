@@ -174,6 +174,8 @@ class Sync < ApplicationRecord
     end
 
     def handle_completion_transition
+      return unless family&.persisted?
+
       family.touch(:latest_sync_completed_at)
     end
 
@@ -184,6 +186,8 @@ class Sync < ApplicationRecord
     end
 
     def update_family_sync_timestamp
+      return unless family&.persisted?
+
       family.touch(:latest_sync_activity_at)
     end
 

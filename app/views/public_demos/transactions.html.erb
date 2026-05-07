@@ -1,0 +1,84 @@
+<% title t(".page_title", demo_name: @demo_title) %>
+
+<div class="w-full space-y-6 pb-12">
+  <section class="rounded-2xl bg-container px-5 py-5 shadow-border-xs lg:px-6 lg:py-6">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div class="space-y-1">
+        <h2 class="text-xl font-medium text-primary lg:text-2xl"><%= t(".heading") %></h2>
+        <p class="max-w-3xl text-sm text-secondary lg:text-base"><%= t(".description") %></p>
+      </div>
+
+      <p class="text-sm text-secondary">
+        <span class="font-medium text-primary"><%= @search.totals.count %></span>
+        <%= t(".results_label") %>
+      </p>
+    </div>
+
+    <div class="mt-5">
+      <%= render "public_demos/transactions/search" %>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div class="rounded-2xl bg-container p-4 shadow-border-xs">
+      <p class="text-sm text-secondary"><%= t(".summary.total_transactions") %></p>
+      <p class="mt-2 text-2xl font-medium text-primary"><%= @search.totals.count %></p>
+    </div>
+
+    <div class="rounded-2xl bg-container p-4 shadow-border-xs">
+      <p class="text-sm text-secondary"><%= t(".summary.income") %></p>
+      <p class="mt-2 text-2xl font-medium text-primary"><%= @search.totals.income_money.format %></p>
+    </div>
+
+    <div class="rounded-2xl bg-container p-4 shadow-border-xs">
+      <p class="text-sm text-secondary"><%= t(".summary.expenses") %></p>
+      <p class="mt-2 text-2xl font-medium text-primary"><%= @search.totals.expense_money.format %></p>
+    </div>
+  </section>
+
+  <section class="overflow-hidden rounded-2xl bg-container shadow-border-xs">
+    <% if @transactions.any? %>
+      <div class="border-b border-secondary px-5 py-4 text-sm text-secondary">
+        <%= t(".table.showing_page", page: @pagy.page, pages: @pagy.pages) %>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table id="public-demo-transactions-table" class="min-w-[1040px] w-full">
+          <thead class="bg-container-inset text-left text-xs font-medium uppercase tracking-wide text-secondary">
+            <tr>
+              <th class="px-5 py-3"><%= t(".table.headers.date") %></th>
+              <th class="px-5 py-3"><%= t(".table.headers.transaction") %></th>
+              <th class="px-5 py-3"><%= t(".table.headers.account") %></th>
+              <th class="px-5 py-3"><%= t(".table.headers.category") %></th>
+              <th class="px-5 py-3"><%= t(".table.headers.type") %></th>
+              <th class="px-5 py-3 text-right"><%= t(".table.headers.amount") %></th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-secondary">
+            <%= render partial: "public_demos/transactions/transaction_row", collection: @transactions, as: :transaction %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="border-t border-secondary px-5 py-4">
+        <%= render "shared/pagination", pagy: @pagy %>
+      </div>
+    <% else %>
+      <div class="px-6 py-12 text-center">
+        <p class="text-lg font-medium text-primary"><%= t(".empty.title") %></p>
+        <p class="mt-2 text-sm text-secondary"><%= t(".empty.body") %></p>
+
+        <% if @q.present? %>
+          <div class="mt-4">
+            <%= render DS::Link.new(
+              text: t(".empty.clear_filters"),
+              variant: "outline",
+              href: public_demo_transactions_path(@demo_slug, locale: @demo_locale)
+            ) %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+</div>

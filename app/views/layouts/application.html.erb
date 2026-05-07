@@ -124,6 +124,13 @@
         <%= icon("panel-right", as_button: true, data: { action: "app-layout#toggleRightSidebar" }) %>
       </div>
 
+      <% if public_demo_mode? %>
+        <div class="mb-6 rounded-xl border border-secondary bg-container px-4 py-3 text-sm text-secondary">
+          <span class="font-medium text-primary">Public demo mode.</span>
+          Everything is visible, but edits are disabled.
+        </div>
+      <% end %>
+
       <% if content_for?(:page_header) %>
         <%= yield :page_header %>
       <% end %>

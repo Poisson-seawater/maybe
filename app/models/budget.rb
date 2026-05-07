@@ -72,11 +72,12 @@ class Budget < ApplicationRecord
 
     # Create missing categories
     categories_to_add.each do |category_id|
-      budget_categories.create!(
+      budget_categories.create_or_find_by!(
         category_id: category_id,
-        budgeted_spending: 0,
-        currency: family.currency
-      )
+      ) do |budget_category|
+        budget_category.budgeted_spending = 0
+        budget_category.currency = family.currency
+      end
     end
 
     # Remove old categories

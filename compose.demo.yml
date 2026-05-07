@@ -1,0 +1,94 @@
+# ===========================================================================
+# Example Docker Compose file for an isolated public demo stack
+# ===========================================================================
+#
+# Purpose:
+# --------
+#
+# This file runs a standalone Maybe instance dedicated to the public demo.
+# It uses its own web container, database, Redis instance, volumes, and
+# credentials so it does not share application data with your main stack.
+#
+# Networking:
+# -----------
+#
+# The web service binds to 127.0.0.1 by default so you can publish it through
+# a reverse proxy without exposing the container port directly on the public
+# interface of the host.
+#
+
+x-db-env: &db_env
+  POSTGRES_USER: ${PUBLIC_DEMO_POSTGRES_USER:-maybe_demo_user}
+  POSTGRES_PASSWORD: ${PUBLIC_DEMO_POSTGRES_PASSWORD:-maybe_demo_password}
+  POSTGRES_DB: ${PUBLIC_DEMO_POSTGRES_DB:-maybe_demo_production}
+
+x-rails-env: &rails_env
+  <<: *db_env
+  SECRET_KEY_BASE: ${PUBLIC_DEMO_SECRET_KEY_BASE:-replace-me-with-a-secret-key}
+  SELF_HOSTED: "true"
+  PUBLIC_DEMO_ONLY: "true"
+  PUBLIC_DEMO_SLUG: ${PUBLIC_DEMO_SLUG:-test-tahiti}
+  PUBLIC_DEMO_EMAIL: ${PUBLIC_DEMO_EMAIL:-tahiti@gmail.com}
+  APP_DOMAIN: ${PUBLIC_DEMO_APP_DOMAIN:-demo.localhost}
+  RAILS_FORCE_SSL: ${PUBLIC_DEMO_RAILS_FORCE_SSL:-false}
+  RAILS_ASSUME_SSL: ${PUBLIC_DEMO_RAILS_ASSUME_SSL:-false}
+  DB_HOST: db
+  DB_PORT: 5432
+  REDIS_URL: redis://redis:6379/1
+
+services:
+  web:
+    image: ${PUBLIC_DEMO_IMAGE_NAME:-maybe-source-public-demo:latest}
+    build:
+      context: .
+    volumes:
+      - app-storage:/rails/storage
+    ports:
+      - 127.0.0.1:${PUBLIC_DEMO_PORT:-3002}:3000
+    restart: unless-stopped
+    environment:
+      <<: *rails_env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - maybe_demo_net
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      <<: *db_env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - maybe_demo_net
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - maybe_demo_net
+
+volumes:
+  app-storage:
+  postgres-data:
+  redis-data:
+
+networks:
+  maybe_demo_net:
+    driver: bridge

@@ -1,0 +1,41 @@
+<div>
+  <div class="flex items-center gap-1.5 px-4 py-2 text-xs font-medium uppercase text-secondary">
+    <p><%= t("public_demos.budget.categories.heading") %></p>
+    <span class="text-subdued">&middot;</span>
+    <p><%= budget.budget_categories.count %></p>
+
+    <p class="ml-auto"><%= t("public_demos.budget.categories.amount") %></p>
+  </div>
+
+  <div class="rounded-md bg-container py-1 shadow-border-xs">
+    <% if budget.family.categories.expenses.empty? %>
+      <div class="py-8 text-center text-sm text-secondary">
+        <%= t("public_demos.budget.categories.empty") %>
+      </div>
+    <% else %>
+      <% category_groups = BudgetCategory::Group.for(budget.budget_categories) %>
+
+      <% category_groups.each do |group| %>
+        <div>
+          <%= render "public_demos/budget_category", budget_category: group.budget_category %>
+
+          <div>
+            <% group.budget_subcategories.each do |budget_subcategory| %>
+              <div class="flex w-full items-center -mt-4">
+                <div class="ml-8 flex items-center justify-center text-subdued">
+                  <%= icon "corner-down-right" %>
+                </div>
+
+                <%= render "public_demos/budget_category", budget_category: budget_subcategory %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%= render "shared/ruler" %>
+      <% end %>
+
+      <%= render "public_demos/budget_category", budget_category: budget.uncategorized_budget_category %>
+    <% end %>
+  </div>
+</div>

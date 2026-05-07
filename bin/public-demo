@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ENV_FILE="${PUBLIC_DEMO_ENV_FILE:-}"
+
+if [[ -n "$ENV_FILE" ]]; then
+  if [[ ! -f "$ENV_FILE" ]]; then
+    echo "Environment file not found: $ENV_FILE" >&2
+    exit 1
+  fi
+
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+fi
+
+COMPOSE_FILE="${PUBLIC_DEMO_COMPOSE_FILE:-compose.demo.yml}"
+PROJECT_NAME="${PUBLIC_DEMO_PROJECT_NAME:-maybe-demo}"
+IMAGE_NAME="${PUBLIC_DEMO_IMAGE_NAME:-maybe-source-public-demo:latest}"
+PORT="${PUBLIC_DEMO_PORT:-3002}"
+SLUG="${PUBLIC_DEMO_SLUG:-test-tahiti}"
+EMAIL="${PUBLIC_DEMO_EMAIL:-tahiti@gmail.com}"
+SECRET_KEY_BASE="${PUBLIC_DEMO_SECRET_KEY_BASE:-demo-public-check}"
+APP_DOMAIN="${PUBLIC_DEMO_APP_DOMAIN:-demo.localhost}"
+
+export PUBLIC_DEMO_COMPOSE_FILE="$COMPOSE_FILE"
+export PUBLIC_DEMO_PROJECT_NAME="$PROJECT_NAME"
+export PUBLIC_DEMO_IMAGE_NAME="$IMAGE_NAME"
+export PUBLIC_DEMO_PORT="$PORT"
+export PUBLIC_DEMO_SLUG="$SLUG"
+export PUBLIC_DEMO_EMAIL="$EMAIL"
+export PUBLIC_DEMO_SECRET_KEY_BASE="$SECRET_KEY_BASE"
+export PUBLIC_DEMO_APP_DOMAIN="$APP_DOMAIN"
+
+docker_access_mode() {
+  if docker info >/dev/null 2>&1; then
+    echo "direct"
+    return
+  fi
+
+  if getent group docker | grep -qw "${USER:-}"; then
+    echo "sg"
+    return
+  fi
+
+  echo "missing"
+}
+
+DOCKER_ACCESS_MODE="$(docker_access_mode)"
+
+run_cmd() {
+  local cmd=("$@")
+
+  case "$DOCKER_ACCESS_MODE" in
+    direct)
+      "${cmd[@]}"
+      ;;
+    sg)
+      local escaped=()
+      local arg
+      for arg in "${cmd[@]}"; do
+        escaped+=("$(printf '%q' "$arg")")
+      done
+      sg docker -c "${escaped[*]}"
+      ;;
+    *)
+      cat <<'EOF' >&2
+Docker est installe, mais cette session ne peut pas l'utiliser.
+Ajoute ton utilisateur au groupe docker puis rouvre la session:
+  sudo usermod -aG docker $USER
+EOF
+      exit 1
+      ;;
+  esac
+}
+
+compose_cmd() {
+  local cmd=(docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME")
+  run_cmd "${cmd[@]}" "$@"
+}
+
+wait_for_url() {
+  local url="$1"
+  local message="$2"
+  local attempt
+
+  echo "$message"
+  for attempt in $(seq 1 60); do
+    if curl -fsS "$url" >/dev/null 2>&1; then
+      echo
+      return
+    fi
+    printf "."
+    sleep 1
+  done
+
+  echo
+  echo "Timed out waiting for $url"
+  exit 1
+}
+
+seed_demo() {
+  echo "Loading synthetic demo data into the isolated demo database..."
+  compose_cmd exec -T web bundle exec rake demo_data:default
+}
+
+start_demo() {
+  cd "$ROOT_DIR"
+
+  echo "Starting isolated public demo stack..."
+  compose_cmd up -d --build
+
+  wait_for_url "http://127.0.0.1:${PORT}/up" "Waiting for the demo stack to boot..."
+  seed_demo
+
+  local demo_url="http://localhost:${PORT}/demo/${SLUG}"
+  local root_url="http://localhost:${PORT}/"
+  wait_for_url "$demo_url" "Waiting for the public demo page..."
+
+  echo "Public demo ready:"
+  echo "  Root: $root_url"
+  echo "  Demo: $demo_url"
+}
+
+stop_demo() {
+  compose_cmd down
+  echo "Isolated public demo stack stopped."
+}
+
+status_demo() {
+  compose_cmd ps
+  echo
+  echo "Expected URL:"
+  echo "  http://localhost:${PORT}/"
+  echo "  http://localhost:${PORT}/demo/${SLUG}"
+}
+
+logs_demo() {
+  compose_cmd logs -f web
+}
+
+usage() {
+  cat <<EOF
+Usage:
+  ./bin/public-demo            Start the isolated public demo stack
+  ./bin/public-demo start      Start or rebuild the isolated public demo stack
+  ./bin/public-demo stop       Stop the isolated public demo stack
+  ./bin/public-demo status     Show current status
+  ./bin/public-demo logs       Follow container logs
+
+Defaults:
+  Root URL:  http://localhost:${PORT}/
+  Demo URL:  http://localhost:${PORT}/demo/${SLUG}
+  Email:     ${EMAIL}
+  Domain:    ${APP_DOMAIN}
+EOF
+}
+
+case "${1:-start}" in
+  start)
+    start_demo
+    ;;
+  stop)
+    stop_demo
+    ;;
+  status)
+    status_demo
+    ;;
+  logs)
+    logs_demo
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac
