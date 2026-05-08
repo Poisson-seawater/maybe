@@ -32,9 +32,9 @@ x-rails-env: &rails_env
   APP_DOMAIN: ${PUBLIC_DEMO_APP_DOMAIN:-demo.localhost}
   RAILS_FORCE_SSL: ${PUBLIC_DEMO_RAILS_FORCE_SSL:-false}
   RAILS_ASSUME_SSL: ${PUBLIC_DEMO_RAILS_ASSUME_SSL:-false}
-  DB_HOST: db
+  DB_HOST: demo-db
   DB_PORT: 5432
-  REDIS_URL: redis://redis:6379/1
+  REDIS_URL: redis://demo-redis:6379/1
 
 services:
   web:
@@ -69,7 +69,9 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - maybe_demo_net
+      maybe_demo_net:
+        aliases:
+          - demo-db
 
   redis:
     image: redis:latest
@@ -82,7 +84,9 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - maybe_demo_net
+      maybe_demo_net:
+        aliases:
+          - demo-redis
 
 volumes:
   app-storage:
